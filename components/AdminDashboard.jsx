@@ -4,9 +4,15 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 
-function sanitizeName(name) {
-  const base = (name || "document.pdf").replace(/[^\w.\-ก-๙ ]+/g, "").replace(/\s+/g, "-").slice(0, 80);
-  return base.toLowerCase().endsWith(".pdf") ? base : `${base}.pdf`;
+// Encode a (possibly Thai) title into an ASCII-safe, %-free token for the blob pathname.
+function b64urlEncode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  bytes.forEach((b) => (bin += String.fromCharCode(b)));
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function titleFromFile(name) {
+  return (name || "document.pdf").replace(/\.pdf$/i, "").trim().slice(0, 120) || "document";
 }
 function fmtDate(iso) {
   if (!iso) return "";
@@ -37,7 +43,7 @@ export default function AdminDashboard({ documents, username, blobReady }) {
     setUploading(true);
     setProgress(0);
     try {
-      const pathname = `pdfs/${Date.now()}__${encodeURIComponent(sanitizeName(file.name))}`;
+      const pathname = `pdfs/${Date.now()}__${b64urlEncode(titleFromFile(file.name))}.pdf`;
       await upload(pathname, file, {
         access: "public",
         contentType: "application/pdf",
