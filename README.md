@@ -48,3 +48,4 @@ npm run dev                  # เปิด http://localhost:3000
 ```
 หน้าแอดมินอยู่ที่ http://localhost:3000/admin
 (การอัปโหลดต้องมี BLOB_READ_WRITE_TOKEN จาก Vercel Blob ถึงจะทำงาน)
+# sak-sales
